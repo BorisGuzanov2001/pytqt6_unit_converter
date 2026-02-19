@@ -6,6 +6,10 @@ import sys
 import json
 
 
+class EmptyValError(Exception):
+    def __init__(self):
+        super().__init__()
+
 class NoPositiveValError(Exception):
     def __init__(self):
         super().__init__()
@@ -24,7 +28,6 @@ class Example(QWidget):
     def initUI(self):
           with open('units.json', encoding='utf-8') as file:
               self.data = json.load(file)
-              # print(self.data)
               self.combo = QComboBox(self)
               self.combo2 = QComboBox(self)
               self.combo3 = QComboBox(self)
@@ -70,15 +73,12 @@ class Example(QWidget):
             self.combo3.addItem(key)
         self.combo2.show()
         self.combo3.show()
-        # print(self.data[text].keys())
 
 
     def the_mouse_was_clicked(self):
-        print("Click Mouse!")
-        if self.qle1.text() == "":
-            # print("Поле пустое. Введите число!")
-            self.qle1.setText("Поле пустое. Введите число!")
         try:
+            if len(self.qle1.text()) == 0:
+                raise EmptyValError
             input_value = int(self.qle1.text())
             if self.combo2.currentText() == self.combo3.currentText():
                 raise MyCustomError
@@ -86,18 +86,16 @@ class Example(QWidget):
                 raise NoPositiveValError
             output_value = round(self.data[self.combo.currentText()][self.combo2.currentText()] * input_value / self.data[self.combo.currentText()][self.combo3.currentText()], 2)
             self.qle2.setText(str(output_value))
-            print(f"output_value = {output_value}")
+        except EmptyValError:
+            self.qle1.setText("Поле пустое. Введите число!")
         except ValueError:
-            # print("Ошибка конвертации строки в число!")
             self.qle1.setText("Ошибка конвертации строки в число!")
         except MyCustomError:
-            # print("Исходная и целевая единицы должны быть разными")
             self.qle1.setText("Исходная и целевая единицы должны быть разными")
         except NoPositiveValError:
             self.qle1.setText("Разрешены только положительные числа")
 
     def the_mouse_was_released(self):
-        # print("Released Mouse")
         self.button.setStyleSheet("background-color: #262626;")
 
 app = QApplication(sys.argv)
